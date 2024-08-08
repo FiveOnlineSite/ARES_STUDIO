@@ -847,7 +847,7 @@ option {
   z-index: 2;
 }
 .about_team .section:hover {
-  flex: 4;
+  flex: 2;
 }
 .about_team .section:hover .overlay {
   background-color: rgba(0, 0, 0, 0.95);
