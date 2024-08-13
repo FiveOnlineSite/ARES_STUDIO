@@ -47,6 +47,16 @@ const projectSchema = new mongoose.Schema({
   metaDescription: {
     type: String,
   },
+  posterImg: {
+    filename: {
+      type: String,
+      default: null,
+    },
+    filepath: {
+      type: String,
+      default: null,
+    },
+  },
 });
 
 const projectModel = mongoose.model("Projects", projectSchema);

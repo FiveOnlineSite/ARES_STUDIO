@@ -38,6 +38,16 @@ const serviceSchema = new mongoose.Schema({
   metaDescription: {
     type: String,
   },
+  posterImg: {
+    filename: {
+      type: String,
+      default: null,
+    },
+    filepath: {
+      type: String,
+      default: null,
+    },
+  },
 });
 
 const serviceModel = mongoose.model("Service", serviceSchema);
