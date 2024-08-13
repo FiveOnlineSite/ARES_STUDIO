@@ -18,6 +18,7 @@ const AddProject = () => {
   const [validationError, setValidationError] = useState(""); // State for validation error message
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
+  const [posterImg, setPosterImg] = useState(null);
 
   const fetchGalleryNames = async () => {
     try {
@@ -49,6 +50,30 @@ const AddProject = () => {
       return;
     }
 
+    if (media.iframe && media.file) {
+      setValidationError(
+        "Please provide either an iFrame URL or an image, not both."
+      );
+      return;
+    }
+
+    if (media.iframe && !posterImg) {
+      setValidationError(
+        "Poster image is required when an iFrame URL is provided."
+      );
+      return;
+    }
+
+    // New validation to ensure both media and posterImg are not provided when media type is image
+    if (media.file && posterImg) {
+      setValidationError(
+        "Please provide either a media image or a poster image, not both."
+      );
+      return;
+    }
+
+    setValidationError("");
+
     try {
       setServiceName(selectedService);
 
@@ -63,7 +88,11 @@ const AddProject = () => {
       if (media.iframe) {
         formData.append("media", media.iframe);
       } else if (media.file) {
-        formData.append("media", media.file);
+        formData.append("mediaFile", media.file);
+      }
+
+      if (posterImg) {
+        formData.append("posterImg", posterImg);
       }
 
       const access_token = localStorage.getItem("access_token");
@@ -250,6 +279,18 @@ const AddProject = () => {
                   </div>
                 </div>
               )}
+            </div>
+
+            <div className="col-lg-6 col-md-6 col-sm-12 col-12">
+              <div className="theme-form">
+                <label>Poster Image (for iPhone)</label>
+                <input
+                  type="file"
+                  name="posterImg"
+                  accept=".webp"
+                  onChange={(e) => setPosterImg(e.target.files[0])}
+                />
+              </div>
             </div>
 
             {errorMessage && (

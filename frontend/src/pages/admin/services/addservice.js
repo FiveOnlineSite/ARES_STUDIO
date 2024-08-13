@@ -11,6 +11,7 @@ const AddService = () => {
   const [subtitle, setSubtitle] = useState("");
   const [description, setDescription] = useState("");
   const [media, setMedia] = useState({ iframe: "", file: null });
+  const [posterImg, setPosterImg] = useState(null);
   const navigate = useNavigate();
   const [metaTitle, setMetaTitle] = useState("");
   const [metaDescription, setMetaDescription] = useState("");
@@ -26,6 +27,30 @@ const AddService = () => {
       return;
     }
 
+    if (media.iframe && media.file) {
+      setValidationError(
+        "Please provide either an iFrame URL or an image, not both."
+      );
+      return;
+    }
+
+    if (media.iframe && !posterImg) {
+      setValidationError(
+        "Poster image is required when an iFrame URL is provided."
+      );
+      return;
+    }
+
+    // New validation to ensure both media and posterImg are not provided when media type is image
+    if (media.file && posterImg) {
+      setValidationError(
+        "Please provide either a media image or a poster image, not both."
+      );
+      return;
+    }
+
+    setValidationError("");
+
     try {
       const formData = new FormData();
       formData.append("service_name", service_name);
@@ -35,25 +60,19 @@ const AddService = () => {
       formData.append("metaTitle", metaTitle);
       formData.append("metaDescription", metaDescription);
 
-      // Check if both media fields are provided
-      if (media.iframe && media.file) {
-        throw new Error(
-          "Please provide either an iFrame URL or an image, not both."
-        );
-      }
-
-      // Check if the media field is empty
-      if (!media.iframe && !media.file) {
-        throw new Error(
-          "Either a file or a valid URL is required for the media field."
-        );
-      }
-
-      // Append media based on the provided type
       if (media.iframe) {
         formData.append("media", media.iframe);
       } else if (media.file) {
         formData.append("media", media.file);
+      }
+
+      if (posterImg) {
+        formData.append("posterImg", posterImg);
+      }
+
+      // Log formData content for debugging
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
       }
 
       const access_token = localStorage.getItem("access_token");
@@ -71,10 +90,6 @@ const AddService = () => {
       });
 
       console.log(response.data.newService);
-      // setTimeout(() => {
-      //   navigate("/admin/services");
-      // }, 2000);
-
       navigate("/admin/services");
     } catch (error) {
       console.error("Error creating service:", error);
@@ -218,6 +233,18 @@ const AddService = () => {
                   </div>
                 </div>
               )}
+            </div>
+
+            <div className="col-lg-6 col-md-6 col-sm-12 col-12">
+              <div className="theme-form">
+                <label>Poster Image (for iPhone)</label>
+                <input
+                  type="file"
+                  name="posterImg"
+                  accept=".webp"
+                  onChange={(e) => setPosterImg(e.target.files[0])}
+                />
+              </div>
             </div>
 
             <div className="col-lg-6 col-md-6 col-sm-12 col-12">

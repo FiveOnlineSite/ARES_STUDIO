@@ -2,11 +2,19 @@ import React, { useState, useEffect, useRef } from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Modal } from "react-bootstrap";
 import axios from "axios";
-import VideoPlayer from "./Videoplayer";
-import { useNavigate } from "react-router-dom"; // Import useHistory
+import VideoPlayer from "./Videoplayer"; // Ensure correct path
+import { useNavigate } from "react-router-dom";
 import "../style/user.css";
 import PasswordForm from "./passwordForm";
 import EmailForm from "./emailForm";
+
+const isIPhoneSafari = () => {
+  return (
+    /iP(ad|hone|od)/.test(navigator.platform) &&
+    /Safari/i.test(navigator.userAgent) &&
+    !/CriOS/i.test(navigator.userAgent)
+  );
+};
 
 const Gallery = ({ service_name }) => {
   const [selectedTab, setSelectedTab] = useState("all");
@@ -16,11 +24,13 @@ const Gallery = ({ service_name }) => {
   const [media, setMedia] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [showEmailForm, setShowEmailForm] = useState(false);
-  const [submittedMedia, setSubmittedMedia] = useState(null); // Track submitted media
-  const navigate = useNavigate(); // Access navigate function from React Router
-  const currentVideoRef = useRef(null); // Ref to store the currently playing video
-
+  const [submittedMedia, setSubmittedMedia] = useState(null);
+  const [posterImg, setPosterImg] = useState(null);
+  const navigate = useNavigate();
+  const currentVideoRef = useRef(null);
+  const isSafariOnIPhone = isIPhoneSafari();
   const apiUrl = process.env.REACT_APP_API_URL;
+
   useEffect(() => {
     const fetchGalleryNames = async () => {
       try {
@@ -43,40 +53,45 @@ const Gallery = ({ service_name }) => {
 
   useEffect(() => {
     const fetchProjectMedia = async () => {
-      console.log("Gallery Name", selectedTab);
       try {
-        let response;
-        if (selectedTab === "all") {
-          response = await axios.get(
-            `${apiUrl}/api/project/project_media?service_name=${service_name}&gallery_name=all`
-          );
-        } else {
-          response = await axios.get(
-            `${apiUrl}/api/project/project_media?service_name=${service_name}&gallery_name=${selectedTab}`
-          );
-        }
+        const url =
+          selectedTab === "all"
+            ? `${apiUrl}/api/project/project_media?service_name=${service_name}&gallery_name=all`
+            : `${apiUrl}/api/project/project_media?service_name=${service_name}&gallery_name=${selectedTab}`;
 
-        if (response.data && response.data.media) {
+        const response = await axios.get(url);
+
+        console.log("API Response Data:", response.data); // Log the entire response to inspect
+
+        if (
+          response.data &&
+          response.data.media &&
+          response.data.media.length > 0
+        ) {
           const mediaArray = Array.isArray(response.data.media)
             ? response.data.media
             : [response.data.media];
 
-          // Sort media array based on project name
+          // Sorting the media array
           mediaArray.sort((a, b) => {
             const nameA = (a.project_Name || a.projectName).toLowerCase();
             const nameB = (b.project_Name || b.projectName).toLowerCase();
             return nameA.localeCompare(nameB);
           });
 
+          // Log each media item's posterImg
+          mediaArray.forEach((item, index) => {
+            console.log(`Media ${index} Poster Image:`, item.posterImg);
+          });
+
+          // Update media state and clear any error message
           setMedia(mediaArray);
-          console.log(mediaArray);
-        } else if (response.data.media.length === 0) {
+          setErrorMessage(""); // Clear the error message if media is found
+        } else {
+          setMedia([]); // Clear media if none is found
           setErrorMessage(
             "No media found for the given service and gallery name."
           );
-        } else {
-          setMedia(response.data.media);
-          setErrorMessage("");
         }
       } catch (error) {
         setErrorMessage("Error fetching media.");
@@ -96,10 +111,9 @@ const Gallery = ({ service_name }) => {
   const handleMediaClick = async (media) => {
     try {
       if (currentVideoRef.current) {
-        currentVideoRef.current.pause(); // Pause the currently playing video
+        currentVideoRef.current.pause();
       }
       setSelectedMedia(media);
-      console.log("Selected Media:", media); // Add this line
       if (media.isPublic) {
         const formattedProjectName = decodeURIComponent(media.project_Name)
           .toLowerCase()
@@ -108,8 +122,8 @@ const Gallery = ({ service_name }) => {
         navigate(`/service-detail/${formattedProjectName}`);
       } else {
         setModalVisible(true);
-        setShowEmailForm(false); // Show password form by default
-        setSubmittedMedia(media); // Track the submitted media
+        setShowEmailForm(false);
+        setSubmittedMedia(media);
       }
     } catch (error) {
       console.error("Error fetching media details:", error);
@@ -131,7 +145,7 @@ const Gallery = ({ service_name }) => {
       if (response.status === 200) {
         localStorage.setItem("submittedMedia", JSON.stringify(selectedMedia));
         localStorage.setItem("emailFormSubmitted", "true");
-        setShowEmailForm(false); // Reset to hide email form
+        setShowEmailForm(false);
         setSubmittedMedia(selectedMedia);
       }
     } catch (error) {
@@ -141,8 +155,6 @@ const Gallery = ({ service_name }) => {
 
   const handlePasswordSubmit = async (password) => {
     try {
-      const apiUrl = process.env.REACT_APP_API_URL;
-
       const response = await axios.post(
         `${apiUrl}/api/email/validate-password`,
         { password }
@@ -169,8 +181,8 @@ const Gallery = ({ service_name }) => {
   };
 
   const handleLinkClick = () => {
-    localStorage.removeItem("submittedMedia", JSON.stringify(selectedMedia));
-    localStorage.removeItem("emailFormSubmitted", "true");
+    localStorage.removeItem("submittedMedia");
+    localStorage.removeItem("emailFormSubmitted");
     setShowEmailForm(true);
   };
 
@@ -203,51 +215,60 @@ const Gallery = ({ service_name }) => {
       ) : (
         <div className="row mt-3">
           {Array.isArray(media) &&
-            media.map((item, index) => (
-              <div key={index} className="col-md-4">
-                <div className="card">
-                  <div
-                    className="media_box position-relative"
-                    onClick={() => handleMediaClick(item)}
-                  >
-                    {item.iframe ? (
-                      <VideoPlayer
-                        src={item.iframe}
-                        type="video/mp4"
-                        className="card-img-top cardImg"
-                        controls
-                        ref={currentVideoRef} // Set the current video ref
-                      />
-                    ) : (
-                      <img
-                        src={
-                          item.filepath
-                            ? `${apiUrl}/${item.filepath}`
-                            : "path_to_placeholder_image"
-                        }
-                        className="card-img-top cardImg"
-                        alt={`Media ${index}`}
-                        loading="lazy"
-                      />
-                    )}
-                    {!item.isPublic && (
-                      <div className="locked-media">
+            media.map((item, index) => {
+              const posterURL = isSafariOnIPhone
+                ? `${apiUrl}/${item.posterImg?.filepath?.replace("\\", "/")}`
+                : undefined;
+
+              return (
+                <div key={index} className="col-md-4">
+                  <div className="card">
+                    <div
+                      className="media_box position-relative"
+                      onClick={() => handleMediaClick(item)}
+                    >
+                      {item.iframe ? (
+                        <VideoPlayer
+                          src={item.iframe}
+                          type="video/mp4"
+                          className="card-img-top cardImg"
+                          controls
+                          ref={currentVideoRef}
+                          playsInline
+                          preload="auto"
+                          poster={posterURL}
+                        />
+                      ) : (
                         <img
-                          src="/images/lock-icon.svg"
-                          className="lock_icon"
-                          alt="Lock Icon"
+                          src={
+                            item.filepath
+                              ? `${apiUrl}/${item.filepath}`
+                              : "path_to_placeholder_image"
+                          }
+                          className="card-img-top cardImg"
+                          alt={`Media ${index}`}
                           loading="lazy"
                         />
-                      </div>
-                    )}
+                      )}
+                      {!item.isPublic && (
+                        <div className="locked-media">
+                          <img
+                            src="/images/lock-icon.svg"
+                            className="lock_icon"
+                            alt="Lock Icon"
+                            loading="lazy"
+                          />
+                        </div>
+                      )}
 
-                    <div className="project-name">
-                      <h3>{item.project_Name || item.projectName} </h3>
+                      <div className="project-name">
+                        <h3>{item.project_Name || item.projectName} </h3>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
         </div>
       )}
       {selectedMedia && !selectedMedia.isPublic && (

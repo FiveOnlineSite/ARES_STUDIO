@@ -10,6 +10,8 @@ const EditService = () => {
   const [service, setService] = useState(null);
   const navigate = useNavigate();
   const [errorMessage, setErrorMessage] = useState("");
+  const [isPosterImgRequired, setIsPosterImgRequired] = useState(false);
+  const [isPosterImgDisabled, setIsPosterImgDisabled] = useState(true);
 
   const [formData, setFormData] = useState({
     service_name: "",
@@ -22,6 +24,10 @@ const EditService = () => {
       iframe: "",
       filepath: "",
     },
+    posterImg: {
+      file: null,
+      filepath: "",
+    },
     metaTitle: "",
     metaDescription: "",
   });
@@ -30,23 +36,36 @@ const EditService = () => {
     const fetchService = async () => {
       try {
         const apiUrl = process.env.REACT_APP_API_URL;
-
         const response = await axios.get(`${apiUrl}/api/service/${id}`);
-        setService(response.data.service);
+        const serviceData = response.data.service;
+        setService(serviceData);
         setFormData({
-          service_name: response.data.service.service_name,
-          url: response.data.service.url,
-          title: response.data.service.title,
-          subtitle: response.data.service.subtitle,
-          description: response.data.service.description,
+          service_name: serviceData.service_name || "",
+          url: serviceData.url || "",
+          title: serviceData.title || "",
+          subtitle: serviceData.subtitle || "",
+          description: serviceData.description || "",
           media: {
             file: null,
-            iframe: response.data.service.media.iframe || "",
-            filepath: response.data.service.media.filepath || "",
+            iframe: serviceData.media.iframe || "",
+            filepath: serviceData.media.filepath
+              ? `${apiUrl}/${serviceData.media.filepath}`
+              : "",
           },
-          metaTitle: response.data.service.metaTitle,
-          metaDescription: response.data.service.metaDescription,
+          posterImg: {
+            file: null,
+            filepath: serviceData.posterImg?.filepath
+              ? `${apiUrl}/${serviceData.posterImg.filepath}`
+              : "",
+          },
+          metaTitle: serviceData.metaTitle || "",
+          metaDescription: serviceData.metaDescription || "",
         });
+
+        // Determine if posterImg should be required and disabled
+        // const isIframe = serviceData.media.iframe.trim() !== "";
+        // setIsPosterImgRequired(serviceData.type === "video");
+        setIsPosterImgDisabled(serviceData.media.iframe.trim() === "");
       } catch (error) {
         console.error("Error fetching service:", error);
       }
@@ -60,29 +79,60 @@ const EditService = () => {
 
     if (name === "media") {
       if (files && files.length > 0) {
-        setFormData({
-          ...formData,
+        setFormData((prevFormData) => ({
+          ...prevFormData,
           media: {
             file: files[0],
-            filename: files[0].name,
-            filepath: URL.createObjectURL(files[0]),
             iframe: "",
+            filepath: URL.createObjectURL(files[0]),
           },
-        });
+          posterImg: {
+            // Reset poster image when media changes
+            file: null,
+            filepath: "",
+          },
+        }));
+        setIsPosterImgRequired(false); // Poster image is not required
       } else {
-        setFormData({
-          ...formData,
+        setFormData((prevFormData) => ({
+          ...prevFormData,
           media: {
-            ...formData.media,
-            iframe: value,
+            ...prevFormData.media,
+            file: null,
+            iframe: value.trim(),
+            filepath: "",
           },
-        });
+          posterImg: {
+            // Reset poster image when media changes
+            file: null,
+            filepath: "",
+          },
+        }));
+        setIsPosterImgRequired(true); // Poster image is required
+      }
+    } else if (name === "posterImg") {
+      if (files && files.length > 0) {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          posterImg: {
+            file: files[0],
+            filepath: URL.createObjectURL(files[0]),
+          },
+        }));
+      } else {
+        setFormData((prevFormData) => ({
+          ...prevFormData,
+          posterImg: {
+            file: null,
+            filepath: "",
+          },
+        }));
       }
     } else {
-      setFormData({
-        ...formData,
+      setFormData((prevFormData) => ({
+        ...prevFormData,
         [name]: value.trim() === "" ? "" : value,
-      });
+      }));
     }
   };
 
@@ -96,22 +146,29 @@ const EditService = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    try {
-      const formDataToSend = new FormData();
-      formDataToSend.append("service_name", formData.service_name);
-      formDataToSend.append("url", formData.url);
-      formDataToSend.append("title", formData.title);
-      formDataToSend.append("subtitle", formData.subtitle);
-      formDataToSend.append("description", formData.description);
-      formDataToSend.append("metaTitle", formData.metaTitle);
-      formDataToSend.append("metaDescription", formData.metaDescription);
+    // Create FormData instance
+    const formDataToSend = new FormData();
 
-      if (formData.media.file) {
-        formDataToSend.append("media", formData.media.file);
+    Object.keys(formData).forEach((key) => {
+      if (key === "media" || key === "posterImg") {
+        if (formData[key].file) {
+          formDataToSend.append(key, formData[key].file);
+        } else if (formData[key].iframe) {
+          formDataToSend.append(key, formData[key].iframe);
+        }
       } else {
-        formDataToSend.append("media", formData.media.iframe.trim());
+        formDataToSend.append(key, formData[key]);
       }
+    });
 
+    // Add type to form data
+    formDataToSend.append(
+      "type",
+      formData.media.iframe.trim() !== "" ? "video" : "image"
+    );
+
+    // Send the request
+    try {
       const access_token = localStorage.getItem("access_token");
       const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -127,7 +184,6 @@ const EditService = () => {
       );
 
       console.log("Updated service", response.data.updatedService);
-
       navigate("/admin/services");
     } catch (error) {
       console.error("Error updating service:", error);
@@ -220,13 +276,6 @@ const EditService = () => {
             <div className="col-lg-6 col-md-6 col-sm-12 col-12">
               <div className="theme-form">
                 <label>Description</label>
-                {/* <textarea
-                  type="text"
-                  name="description"
-                  value={formData.description || ""}
-                  onChange={handleChange}
-                  rows={4}
-                /> */}
                 <ReactQuill
                   theme="snow"
                   modules={modules}
@@ -258,13 +307,35 @@ const EditService = () => {
                 {formData.media.filepath && (
                   <img
                     className="form-profile"
-                    src={`${process.env.REACT_APP_API_URL}/${formData.media.filepath}`}
+                    src={formData.media.filepath}
                     alt="Media"
                     loading="lazy"
                   />
                 )}
               </div>
             </div>
+
+            {formData.media.iframe && (
+              <div className="col-lg-6 col-md-6 col-sm-12 col-12">
+                <div className="theme-form">
+                  <label>Poster Image (for iPhone)</label>
+                  <input
+                    type="file"
+                    name="posterImg"
+                    accept=".webp"
+                    onChange={handleChange}
+                  />
+                  {formData.posterImg.filepath && (
+                    <img
+                      className="form-profile"
+                      src={formData.posterImg.filepath}
+                      alt="Poster"
+                      loading="lazy"
+                    />
+                  )}
+                </div>
+              </div>
+            )}
 
             <div className="col-lg-6 col-md-6 col-sm-12 col-12">
               <div className="theme-form">
@@ -281,12 +352,11 @@ const EditService = () => {
             <div className="col-lg-6 col-md-6 col-sm-12 col-12">
               <div className="theme-form">
                 <label>Meta Description</label>
-                <textarea
+                <input
                   type="text"
                   name="metaDescription"
                   value={formData.metaDescription}
                   onChange={handleChange}
-                  rows={4}
                 />
               </div>
             </div>

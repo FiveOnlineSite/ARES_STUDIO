@@ -81,7 +81,7 @@ const ProjectDetail = () => {
                   {projectDetails.length > 0 ? (
                     projectDetails.map((projectDetail) => (
                       <tr key={projectDetail._id}>
-                        <td>{projectDetail.project.project_name || "N/A"}</td>
+                        <td>{projectDetail.project_name || "N/A"}</td>
                         <td>{projectDetail.sequence}</td>
                         <td className="text-center">
                           {projectDetail.type === "image" ? (
@@ -116,7 +116,7 @@ const ProjectDetail = () => {
                   ) : (
                     <tr>
                       <td colSpan="5" className="text-center">
-                        Loading....
+                        No Data Available
                       </td>
                     </tr>
                   )}
