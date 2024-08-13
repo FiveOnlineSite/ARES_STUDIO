@@ -68,9 +68,18 @@ import axios from "axios";
 import "../../style/user.css";
 import { Helmet } from "react-helmet";
 
+const isIPhoneSafari = () => {
+  return (
+    /iP(ad|hone|od)/.test(navigator.platform) &&
+    /Safari/i.test(navigator.userAgent) &&
+    !/CriOS/i.test(navigator.userAgent)
+  );
+};
+
 const Home = () => {
   const [gamesData, setGamesData] = useState(null);
   const [vfxData, setVfxData] = useState(null);
+  const isSafariOnIPhone = isIPhoneSafari(); // Check if the user is on iPhone Safari
 
   console.log("api", `${process.env.REACT_APP_API_URL}`);
 
@@ -128,7 +137,16 @@ const Home = () => {
                         {gamesData &&
                         gamesData.media &&
                         gamesData.media.iframe ? (
-                          <VideoPlayer src={gamesData.media.iframe} />
+                          <VideoPlayer
+                            src={gamesData.media.iframe}
+                            playsInline
+                            preload="auto"
+                            poster={
+                              isSafariOnIPhone
+                                ? `${process.env.REACT_APP_API_URL}/${gamesData.posterImg.filepath}`
+                                : undefined
+                            }
+                          />
                         ) : gamesData &&
                           gamesData.media &&
                           gamesData.media.filepath ? (
@@ -161,7 +179,16 @@ const Home = () => {
                     <div className="app">
                       <div className="video-list">
                         {vfxData && vfxData.media && vfxData.media.iframe ? (
-                          <VideoPlayer src={vfxData.media.iframe} />
+                          <VideoPlayer
+                            src={vfxData.media.iframe}
+                            playsInline
+                            preload="auto"
+                            poster={
+                              isSafariOnIPhone
+                                ? `${process.env.REACT_APP_API_URL}/${vfxData.posterImg.filepath}`
+                                : undefined
+                            }
+                          />
                         ) : vfxData &&
                           vfxData.media &&
                           vfxData.media.filepath ? (
