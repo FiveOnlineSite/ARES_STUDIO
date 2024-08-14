@@ -127,13 +127,7 @@ const createProjectDetail = async (req, res) => {
 const updateProjectDetail = async (req, res) => {
   try {
     const projectId = req.params._id;
-    const {
-      project_name,
-      sequence,
-      description,
-      type,
-      media: mediaField,
-    } = req.body;
+    const { project_name, media, sequence, description, type } = req.body;
 
     // Ensure project name and type are present
     if (!project_name) {
@@ -153,85 +147,127 @@ const updateProjectDetail = async (req, res) => {
       return res.status(404).json({ message: "Project Detail not found." });
     }
 
-    // Update fields
-    const updatedFields = {
-      project_name: project_name || existingProjectDetail.project_name,
-      sequence: sequence || existingProjectDetail.sequence,
-      description: description || existingProjectDetail.description,
-      type: type || existingProjectDetail.type,
-    };
-
-    // Handle media based on type
-    if (type === "video") {
-      if (mediaField && mediaField.startsWith("http")) {
-        updatedFields.media = {
-          filename: "",
-          filepath: "",
-          iframe: mediaField,
-        };
-      } else if (mediaFile) {
-        updatedFields.media = {
-          filename: mediaFile.originalname,
-          filepath: mediaFile.path,
-          iframe: "",
-        };
-      } else {
-        return res.status(400).json({
-          message: "A valid media URL or file is required for video type.",
-        });
-      }
-
-      // Handle posterImg
-      if (posterImgFile) {
-        updatedFields.posterImg = {
-          filename: posterImgFile.originalname,
-          filepath: posterImgFile.path,
-        };
-      } else if (!posterImgFile && !existingProjectDetail.posterImg) {
-        return res.status(400).json({
-          message: "Poster Image is required when media is a video.",
-        });
-      } else {
-        updatedFields.posterImg = existingProjectDetail.posterImg; // Retain existing posterImg if not provided
-      }
-    } else if (type === "image") {
-      if (mediaFile) {
-        updatedFields.media = {
-          filename: mediaFile.originalname,
-          filepath: mediaFile.path,
-          iframe: "",
-        };
-      } else if (
-        !existingProjectDetail.media ||
-        !existingProjectDetail.media.filepath
-      ) {
-        return res.status(400).json({
-          message: "Image media file is required when type is image.",
-        });
-      } else {
-        updatedFields.media = existingProjectDetail.media; // Retain existing media if not provided
-      }
-      updatedFields.posterImg = null; // Poster image is not required for image type
-    } else {
-      if (mediaFile) {
-        updatedFields.media = {
-          filename: mediaFile.originalname,
-          filepath: mediaFile.path,
-          iframe: "",
-        };
-      } else if (mediaField && mediaField.startsWith("http")) {
-        updatedFields.media = {
-          filename: "",
-          filepath: "",
-          iframe: mediaField,
-        };
-      } else {
-        updatedFields.media = existingProjectDetail.media; // Retain existing media data if none provided
-      }
-      updatedFields.posterImg = null; // Poster image is not required for types other than video
+    // Step 1: Update project_name for all entries with the same project_id
+    const project = await projectModel.findOne({ project_name });
+    if (!project) {
+      return res.status(404).json({ message: "Project not found." });
     }
 
-    // Perform update operation
+    await projectDetailsModel.updateMany(
+      { project_id: existingProjectDetail.project_id },
+      { $set: { project_name } }
+    );
+
+    // Step 2: Prepare media data
+    let mediaData = {
+      filename: existingProjectDetail.media.filename,
+      filepath: existingProjectDetail.media.filepath,
+      iframe: existingProjectDetail.media.iframe,
+    };
+
+    // Validate media file or URL based on type
+    if (mediaFile) {
+      // Validate for specific types if necessary (e.g., WebP for images)
+      if (
+        type === "image" &&
+        path.extname(mediaFile.originalname).toLowerCase() !== ".webp"
+      ) {
+        return res.status(400).json({
+          message: "Unsupported file type. Please upload a WebP image.",
+        });
+      }
+
+      mediaData = {
+        filename: mediaFile.originalname,
+        filepath: mediaFile.path,
+        iframe: "",
+      };
+    } else if (media !== undefined && media !== null) {
+      const trimmedMedia = typeof media === "string" ? media.trim() : media;
+
+      // Check if media is a valid URL
+      const isURL = (str) => {
+        try {
+          new URL(str);
+          return true;
+        } catch (error) {
+          return false;
+        }
+      };
+
+      if (trimmedMedia && !isURL(trimmedMedia)) {
+        return res.status(400).json({ message: "Invalid media URL." });
+      }
+
+      mediaData = {
+        filename: null,
+        filepath: null,
+        iframe: trimmedMedia,
+      };
+    }
+
+    // Step 3: Handle sequence updates
+    if (sequence && sequence !== existingProjectDetail.sequence) {
+      const projectDetails = await projectDetailsModel
+        .find({ project_id: existingProjectDetail.project_id })
+        .sort({ sequence: 1 });
+
+      let updateOperations = [];
+      let maxSequence = projectDetails.length;
+
+      if (sequence > maxSequence) {
+        return res.status(400).json({
+          message: `Invalid sequence. The sequence cannot be greater than ${maxSequence}.`,
+        });
+      }
+
+      projectDetails.forEach((detail) => {
+        if (detail._id.toString() !== existingProjectDetail._id.toString()) {
+          if (
+            detail.sequence >= sequence &&
+            detail.sequence < existingProjectDetail.sequence
+          ) {
+            updateOperations.push({
+              updateOne: {
+                filter: { _id: detail._id },
+                update: { $inc: { sequence: 1 } },
+              },
+            });
+          } else if (
+            detail.sequence > existingProjectDetail.sequence &&
+            detail.sequence <= sequence
+          ) {
+            updateOperations.push({
+              updateOne: {
+                filter: { _id: detail._id },
+                update: { $inc: { sequence: -1 } },
+              },
+            });
+          }
+        }
+      });
+
+      if (updateOperations.length > 0) {
+        await projectDetailsModel.bulkWrite(updateOperations);
+      }
+    }
+
+    // Step 4: Update the specific project detail entry with new values
+    const updatedFields = {
+      project_name,
+      project_id: project._id,
+      media: mediaData,
+      type: mediaData.filename ? "image" : "video",
+      sequence: sequence || existingProjectDetail.sequence,
+      description: description || existingProjectDetail.description,
+      posterImg: posterImgFile
+        ? {
+            filename: posterImgFile.originalname,
+            filepath: posterImgFile.path,
+          }
+        : existingProjectDetail.posterImg,
+    };
+
     const updatedProjectDetail = await projectDetailsModel.findByIdAndUpdate(
       projectId,
       updatedFields,
@@ -243,21 +279,21 @@ const updateProjectDetail = async (req, res) => {
       return res.status(404).json({ message: "Project Detail not found" });
     }
 
-    res.status(200).json({ updatedProjectDetail });
+    res.status(200).json({
+      message: "Project details updated successfully.",
+      updatedProjectDetail,
+    });
   } catch (error) {
     console.error("Error updating project detail:", error);
-    res.status(500).json({ message: "An error occurred" });
+    res.status(500).json({ message: `An error occurred: ${error.message}` });
   }
 };
-
-module.exports = { updateProjectDetail };
-
-module.exports = { updateProjectDetail };
 
 const getProjectMediaByName = async (req, res) => {
   try {
     const project_name = req.query.project_name;
 
+    // Normalize project name
     const projectName = project_name
       .split("-")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
@@ -268,29 +304,29 @@ const getProjectMediaByName = async (req, res) => {
       return res.status(400).json({ message: "Project Name is required." });
     }
 
-    const projectDetail = await projectDetailsModel.find({
+    // Fetch project details by name
+    const projectDetails = await projectDetailsModel.find({
       project_name: projectName,
     });
 
-    if (!projectDetail || projectDetail.length === 0) {
+    if (!projectDetails || projectDetails.length === 0) {
       return res.status(404).json({
-        message: `No project media found for this given project name ${project_name}`,
+        message: `No project media found for the given project name ${project_name}`,
       });
     }
 
-    // Assuming posterImg is within media
-    const media = projectDetail
-      .map((detail) => detail.media)
-      .flat()
-      .sort((a, b) => a.sequence - b.sequence);
-
-    const posterImg =
-      projectDetail.length > 0 ? projectDetail[0].posterImg : null;
+    // Structure the response data and sort by sequence
+    const mediaData = projectDetails
+      .map((detail) => ({
+        media: detail.media,
+        posterImg: detail.posterImg,
+        sequence: detail.sequence,
+      }))
+      .sort((a, b) => a.sequence - b.sequence); // Sort by sequence
 
     return res.status(200).json({
-      message: "Project details media fetched successfully.",
-      media,
-      posterImg,
+      message: "Project details media fetched and sorted successfully.",
+      mediaData,
     });
   } catch (error) {
     return res.status(500).json({

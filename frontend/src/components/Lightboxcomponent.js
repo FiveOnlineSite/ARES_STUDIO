@@ -32,18 +32,16 @@ const Lightboxcomponent = () => {
         );
 
         const projectDetail = response.data || {};
-        const { media: projectMedia = [], posterImg: projectPosterImg = null } =
-          projectDetail;
+        const { mediaData = [] } = projectDetail;
 
-        const sortedMedia = Array.isArray(projectMedia)
-          ? projectMedia.sort((a, b) => a.sequence - b.sequence)
-          : [];
+        // Ensure sorting by sequence
+        const sortedMedia = mediaData.sort(
+          (a, b) => a.media.sequence - b.media.sequence
+        );
 
         console.log("Sorted Media:", sortedMedia);
-        console.log("Poster Image:", projectPosterImg);
 
         setMedia(sortedMedia);
-        setPosterImg(projectPosterImg);
       } catch (error) {
         console.error("Error fetching project media:", error);
       }
@@ -83,6 +81,13 @@ const Lightboxcomponent = () => {
     };
   }, [modalVisible]);
 
+  const getPosterForMedia = (index) => {
+    // Assuming the poster images are ordered and correspond to the media array
+    return posterImg[index]
+      ? `${apiUrl}/${posterImg[index].filepath.replace("\\", "/")}`
+      : null;
+  };
+
   return (
     <div className="lightbox_gallery">
       <div className="container text-center py-5">
@@ -100,15 +105,15 @@ const Lightboxcomponent = () => {
                   className="col-sm-4"
                 >
                   <div className="gal-box">
-                    {item.iframe ? (
+                    {item.media.iframe ? (
                       <VideoPlayer
-                        src={item.iframe}
+                        src={item.media.iframe}
                         className="card-img-top w-100"
                         playsInline
                         preload="auto"
                         poster={
                           isSafariOnIPhone
-                            ? `${apiUrl}/${item.posterImg?.filepath?.replace(
+                            ? `${apiUrl}/${item.posterImg.filepath.replace(
                                 "\\",
                                 "/"
                               )}`
@@ -117,8 +122,8 @@ const Lightboxcomponent = () => {
                       />
                     ) : (
                       <img
-                        src={`${apiUrl}/${item.filepath}`}
-                        alt={`${item.filename}`}
+                        src={`${apiUrl}/${item.media.filepath}`}
+                        alt={`${item.media.filename}`}
                         className="card-img-top"
                         loading="lazy"
                       />
