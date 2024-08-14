@@ -175,11 +175,11 @@ const Lightboxcomponent = () => {
                             index === activeIndex ? "active" : ""
                           }`}
                         >
-                          {item.iframe ? (
+                          {item.media.iframe ? (
                             <div className="embed-responsive embed-responsive-16by9 bg-dark">
                               {index === activeIndex && (
                                 <video
-                                  src={item.iframe}
+                                  src={item.media.iframe}
                                   title={`Media ${index}`}
                                   allowFullScreen
                                   className="embed-responsive-item"
