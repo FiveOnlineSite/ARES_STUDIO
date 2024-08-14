@@ -104,18 +104,16 @@ const Lightboxcomponent = () => {
                       <VideoPlayer
                         src={item.iframe}
                         className="card-img-top w-100"
-                        // controls
-                        // startTime={10}
                         playsInline
                         preload="auto"
-                        // poster={
-                        //   isSafariOnIPhone
-                        //     ? `${apiUrl}/${posterImg?.filepath?.replace(
-                        //         "\\",
-                        //         "/"
-                        //       )}`
-                        //     : undefined
-                        // }
+                        poster={
+                          isSafariOnIPhone
+                            ? `${apiUrl}/${item.posterImg?.filepath?.replace(
+                                "\\",
+                                "/"
+                              )}`
+                            : undefined
+                        }
                       />
                     ) : (
                       <img
