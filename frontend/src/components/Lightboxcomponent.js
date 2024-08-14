@@ -111,6 +111,7 @@ const Lightboxcomponent = () => {
                         className="card-img-top w-100"
                         playsInline
                         preload="auto"
+                        startTime={10}
                         poster={
                           isSafariOnIPhone
                             ? `${apiUrl}/${item.posterImg.filepath.replace(
