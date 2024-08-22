@@ -191,7 +191,7 @@ const Lightboxcomponent = () => {
                             </div>
                           ) : (
                             <img
-                              src={`${apiUrl}/${item.filepath}`}
+                              src={`${apiUrl}/${item.media.filepath}`}
                               alt={`Media ${index}`}
                               className="img-fluid mh-100"
                               loading="lazy"
