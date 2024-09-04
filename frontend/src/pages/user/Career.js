@@ -406,6 +406,7 @@ import "../../style/user.css";
 import axios from "axios";
 import VideoPlayer from "../../components/Videoplayer";
 import { Helmet } from "react-helmet";
+import MetaTag from "../../components/MetaTag";
 
 export default function Career() {
   const [careerData, setCareerData] = useState(null);
@@ -432,6 +433,45 @@ export default function Career() {
         const apiUrl = process.env.REACT_APP_API_URL;
         const response = await axios.get(`${apiUrl}/api/career`);
         setCareerData(response.data.careers);
+        console.log("metadesc", response.data.careers[0].metaDescription);
+        // Set meta tags dynamically after data is fetched
+        if (response.data.careers.length > 0) {
+          const career = response.data.careers[0];
+
+          // Set document title
+          document.title = career.metaTitle || "Default Title";
+
+          // Update or create meta description
+          let metaDescription = document.querySelector(
+            'meta[name="description"]'
+          );
+          if (metaDescription) {
+            metaDescription.setAttribute(
+              "content",
+              career.metaDescription || "Default description"
+            );
+          } else {
+            metaDescription = document.createElement("meta");
+            metaDescription.name = "description";
+            metaDescription.content =
+              career.metaDescription || "Default description";
+            document.head.appendChild(metaDescription);
+          }
+
+          // Update or create meta title (if using a custom meta tag for titles, though not typical)
+          let metaTitle = document.querySelector('meta[name="title"]');
+          if (metaTitle) {
+            metaTitle.setAttribute(
+              "content",
+              career.metaTitle || "Default Title"
+            );
+          } else {
+            metaTitle = document.createElement("meta");
+            metaTitle.name = "title";
+            metaTitle.content = career.metaTitle || "Default Title";
+            document.head.appendChild(metaTitle);
+          }
+        }
       } catch (error) {
         console.error("Error fetching career details:", error);
         setCareerData([]); // Handle error state
@@ -553,13 +593,27 @@ export default function Career() {
 
   return (
     <Layout>
-      {careerData && (
+      {/* <MetaTag
+        title="Career - Your Company"
+        description="Learn more about us and our mission."
+      /> */}
+      {/* {careerData && (
         <Helmet>
           <title>{careerData[0]?.metaTitle}</title>
           <meta name="title" content={careerData[0]?.metaTitle} />
           <meta name="description" content={careerData[0]?.metaDescription} />
         </Helmet>
-      )}
+      )} */}
+
+      {/* <Helmet>
+        <title>{careerData[0].metaTitle || "Default Title"}</title>
+        <meta name="title" content={careerData[0]?.metaTitle || "Career"} />
+        <meta
+          name="description"
+          content={careerData[0].metaDescription || "Default description"}
+        />
+      </Helmet> */}
+
       <div className="service_section position-relative">
         <div className="app">
           <div className="video-list">

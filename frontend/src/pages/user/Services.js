@@ -48,6 +48,30 @@ const Services = () => {
     fetchServicesData();
   }, []);
 
+  useEffect(() => {
+    document.title = "Services | ARES STUDIO";
+
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute("content", "Services description");
+    } else {
+      metaDescription = document.createElement("meta");
+      metaDescription.name = "description";
+      metaDescription.content = "Service description";
+      document.head.appendChild(metaDescription);
+    }
+
+    let metaTitle = document.querySelector('meta[name="title"]');
+    if (metaTitle) {
+      metaTitle.setAttribute("content", "Services Title");
+    } else {
+      metaTitle = document.createElement("meta");
+      metaTitle.name = "title";
+      metaTitle.content = "Services Title";
+      document.head.appendChild(metaTitle);
+    }
+  }, []);
+
   const styles = {
     homeBanner: {
       lineHeight: "0",

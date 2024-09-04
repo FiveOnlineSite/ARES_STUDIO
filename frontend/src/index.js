@@ -9,7 +9,14 @@ import "./style/index.css";
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   // <AuthPro>
+  // <BrowserRouter>
+  // <App />
+  // </BrowserRouter>
+
+  // <HelmetProvider>
   <App />
+  // </HelmetProvider>
+
   // </AuthPro>
 );
 

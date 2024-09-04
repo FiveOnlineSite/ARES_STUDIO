@@ -110,6 +110,30 @@ const Home = () => {
     fetchServicesData();
   }, []);
 
+  useEffect(() => {
+    document.title = "Contact | ARES STUDIO";
+
+    let metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute("content", "Home description");
+    } else {
+      metaDescription = document.createElement("meta");
+      metaDescription.name = "description";
+      metaDescription.content = "Home description";
+      document.head.appendChild(metaDescription);
+    }
+
+    let metaTitle = document.querySelector('meta[name="title"]');
+    if (metaTitle) {
+      metaTitle.setAttribute("content", "Home Title");
+    } else {
+      metaTitle = document.createElement("meta");
+      metaTitle.name = "title";
+      metaTitle.content = "Home Title";
+      document.head.appendChild(metaTitle);
+    }
+  }, []);
+
   const styles = {
     homeBanner: {
       lineHeight: "0",
