@@ -111,7 +111,7 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    document.title = "Contact | ARES STUDIO";
+    document.title = "Home | ARES STUDIO";
 
     let metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
