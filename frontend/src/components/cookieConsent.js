@@ -23,8 +23,9 @@ const CookieConsent = ({ onAccept }) => {
     showPopup && (
       <div className="cookie-consent">
         <p>
-          We use cookies to improve your experience. By using our site, you
-          agree to our use of cookies.
+          We are a Full Cycle Art outsource studio. From Concepts to engine
+          integration. We provide world's best selling games with beautiful and
+          well-optimized game art. We are Unreal Engine Specialists.
         </p>
         <button onClick={handleAccept}>Accept</button>
         <button onClick={handleClose}>Decline</button>
