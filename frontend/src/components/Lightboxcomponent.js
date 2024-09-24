@@ -345,10 +345,10 @@ const Lightboxcomponent = () => {
                         startTime={10}
                         poster={
                           isSafariOnIPhone
-                            ? `${apiUrl}/${item.posterImg.filepath.replace(
+                            ? `${apiUrl}/${item.posterImg1.filepath.replace(
                                 "\\",
                                 "/"
-                              )}` || "/images/about-bg.jpg"
+                              )}` || "/images/default-poster.jpg"
                             : undefined
                         }
                       />
