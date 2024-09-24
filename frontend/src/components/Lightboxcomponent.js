@@ -344,12 +344,12 @@ const Lightboxcomponent = () => {
                         preload="metadata" // Changed to "metadata"
                         startTime={10}
                         poster={
-                          isSafariOnIPhone
+                          isSafariOnIPhone && item.posterImg
                             ? `${apiUrl}/${item.posterImg1.filepath.replace(
                                 "\\",
                                 "/"
-                              )}` || "/images/default-poster.jpg"
-                            : undefined
+                              )}`
+                            : "/images/default-poster.jpg"
                         }
                       />
                     ) : (
