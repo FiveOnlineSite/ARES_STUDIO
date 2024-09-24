@@ -347,7 +347,7 @@ const Lightboxcomponent = () => {
                           isSafariOnIPhone && !item.posterImg
                             ? "/images/default-poster.jpg" // Show default image if posterImg is missing
                             : item.posterImg
-                            ? `${apiUrl}/${item.posterImg.filepath.replace(
+                            ? `${apiUrl}/invalid-path/${item.posterImg.filepath.replace(
                                 "\\",
                                 "/"
                               )}`
