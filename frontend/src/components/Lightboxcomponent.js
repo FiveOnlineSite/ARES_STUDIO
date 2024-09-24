@@ -344,12 +344,14 @@ const Lightboxcomponent = () => {
                         preload="metadata" // Changed to "metadata"
                         startTime={10}
                         poster={
-                          isSafariOnIPhone && item.posterImg
-                            ? `${apiUrl}/${apiUrl}/${item.posterImg.filepath.replace(
+                          isSafariOnIPhone && !item.posterImg
+                            ? "/images/default-poster.jpg" // Show default image if posterImg is missing
+                            : item.posterImg
+                            ? `${apiUrl}/${item.posterImg.filepath.replace(
                                 "\\",
                                 "/"
                               )}`
-                            : "/images/default-poster.jpg"
+                            : "/images/default-poster.jpg" // Fallback to default image if posterImg is invalid
                         }
                       />
                     ) : (
