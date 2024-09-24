@@ -118,7 +118,7 @@ const Lightboxcomponent = () => {
                                 "\\",
                                 "/"
                               )}`
-                            : undefined
+                            : "/images/about-bg.jpg"
                         }
                       />
                     ) : (
