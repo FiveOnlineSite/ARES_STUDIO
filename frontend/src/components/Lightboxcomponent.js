@@ -345,7 +345,7 @@ const Lightboxcomponent = () => {
                         startTime={10}
                         poster={
                           isSafariOnIPhone && item.posterImg
-                            ? `${apiUrl}/${item.posterImg1.filepath.replace(
+                            ? `${apiUrl}/${apiUrl}/${item.posterImg.filepath.replace(
                                 "\\",
                                 "/"
                               )}`
