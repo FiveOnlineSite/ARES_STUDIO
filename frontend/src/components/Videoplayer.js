@@ -170,6 +170,9 @@ const VideoPlayer = forwardRef(({ src, style, startTime, poster }, ref) => {
         playsInline
         preload="metadata" // Changed to "metadata"
         poster={poster}
+        onError={(e) => {
+          e.target.src = "/images/default-poster.jpg";
+        }}
       />
     </div>
   );

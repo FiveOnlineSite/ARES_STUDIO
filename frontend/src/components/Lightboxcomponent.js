@@ -344,7 +344,8 @@ const Lightboxcomponent = () => {
                         preload="metadata" // Changed to "metadata"
                         startTime={10}
                         poster={
-                          isSafariOnIPhone && !item.posterImg
+                          isSafariOnIPhone &&
+                          (!item.posterImg || !item.posterImg.filepath)
                             ? "/images/default-poster.jpg" // Show default image if posterImg is missing
                             : item.posterImg
                             ? `${apiUrl}/invalid-path/${item.posterImg.filepath.replace(
