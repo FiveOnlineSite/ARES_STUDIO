@@ -11,10 +11,16 @@ const Header = () => {
         </label>
       </h2>
       <div className="user-wrapper dropdown">
-        <button onclick="myFunction()" className="dropbtn">
+        <div className="dropbtn">
+          <img
+            width={"30px"}
+            height={"30px"}
+            src="/images/profile.png"
+            alt=""
+          />
           {/* <img src="src/img/user-icon-img.png" width="40px" height="40px" /> */}
-          <small>Super Admin</small>
-        </button>
+          <small>Admin</small>
+        </div>
 
         <div id="myDropdown" className="dropdown-content">
           {/* <a href="my-profile.php" title="My Profile"><i className="las la-user"></i> My Profile</a>
