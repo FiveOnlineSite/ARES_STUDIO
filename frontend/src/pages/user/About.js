@@ -251,7 +251,9 @@ export default function About() {
           const about = response.data.abouts[0];
 
           // Set document title
-          document.title = about.metaTitle || "Default Title";
+          document.title =
+            about.metaTitle ||
+            "About Ares Studio | Creative Talent & Production Pipelines";
 
           // Update or create meta description
           let metaDescription = document.querySelector(
@@ -260,13 +262,15 @@ export default function About() {
           if (metaDescription) {
             metaDescription.setAttribute(
               "content",
-              about.metaDescription || "Default description"
+              about.metaDescription ||
+                "Learn about Ares Studio’s vision, leadership, and capabilities in games, VFX, and digital production built to support high-quality global delivery."
             );
           } else {
             metaDescription = document.createElement("meta");
             metaDescription.name = "description";
             metaDescription.content =
-              about.metaDescription || "Default description";
+              about.metaDescription ||
+              "Learn about Ares Studio’s vision, leadership, and capabilities in games, VFX, and digital production built to support high-quality global delivery.";
             document.head.appendChild(metaDescription);
           }
 
@@ -275,12 +279,15 @@ export default function About() {
           if (metaTitle) {
             metaTitle.setAttribute(
               "content",
-              about.metaTitle || "Default Title"
+              about.metaTitle ||
+                "About Ares Studio | Creative Talent & Production Pipelines"
             );
           } else {
             metaTitle = document.createElement("meta");
             metaTitle.name = "title";
-            metaTitle.content = about.metaTitle || "Default Title";
+            metaTitle.content =
+              about.metaTitle ||
+              "About Ares Studio | Creative Talent & Production Pipelines";
             document.head.appendChild(metaTitle);
           }
         }

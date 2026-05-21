@@ -405,25 +405,33 @@ export default function Contact() {
   };
 
   useEffect(() => {
-    document.title = "Contact | ARES STUDIO";
+    document.title = "Contact Ares Studio | Start Your Creative Project";
 
     let metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute("content", "Contact description");
+      metaDescription.setAttribute(
+        "content",
+        "Get in touch with Ares Studio to discuss game art, VFX, and digital production requirements. Let’s build exceptional visual experiences together."
+      );
     } else {
       metaDescription = document.createElement("meta");
       metaDescription.name = "description";
-      metaDescription.content = "Contact description";
+      metaDescription.content =
+        "Get in touch with Ares Studio to discuss game art, VFX, and digital production requirements. Let’s build exceptional visual experiences together.";
       document.head.appendChild(metaDescription);
     }
 
     let metaTitle = document.querySelector('meta[name="title"]');
     if (metaTitle) {
-      metaTitle.setAttribute("content", "Contact us Title");
+      metaTitle.setAttribute(
+        "content",
+        "Contact Ares Studio | Start Your Creative Project"
+      );
     } else {
       metaTitle = document.createElement("meta");
       metaTitle.name = "title";
-      metaTitle.content = "Contact us Title";
+      metaTitle.content =
+        "Contact Ares Studio | Start Your Creative Project";
       document.head.appendChild(metaTitle);
     }
   }, []);
