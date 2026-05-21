@@ -220,7 +220,7 @@ const Service = () => {
           const service = response.data.service;
 
           // Set document title
-          document.title = service.metaTitle || "Default Title";
+          document.title = service.metaTitle || "Game Art Services | Ares Studio";
 
           // Update or create meta description
           let metaDescription = document.querySelector(
@@ -229,13 +229,15 @@ const Service = () => {
           if (metaDescription) {
             metaDescription.setAttribute(
               "content",
-              service.metaDescription || "Default description"
+              service.metaDescription ||
+                "From concept to final assets, Ares Studio provides high-quality game art, environments, characters, and live-production support for modern game teams."
             );
           } else {
             metaDescription = document.createElement("meta");
             metaDescription.name = "description";
             metaDescription.content =
-              service.metaDescription || "Default description";
+              service.metaDescription ||
+              "From concept to final assets, Ares Studio provides high-quality game art, environments, characters, and live-production support for modern game teams.";
             document.head.appendChild(metaDescription);
           }
 
@@ -244,12 +246,13 @@ const Service = () => {
           if (metaTitle) {
             metaTitle.setAttribute(
               "content",
-              service.metaTitle || "Default Title"
+              service.metaTitle || "Game Art Services | Ares Studio"
             );
           } else {
             metaTitle = document.createElement("meta");
             metaTitle.name = "title";
-            metaTitle.content = service.metaTitle || "Default Title";
+            metaTitle.content =
+              service.metaTitle || "Game Art Services | Ares Studio";
             document.head.appendChild(metaTitle);
           }
         }

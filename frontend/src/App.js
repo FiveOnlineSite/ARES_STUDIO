@@ -351,6 +351,23 @@ import CookieConsent from "./components/cookieConsent";
 function App() {
   const [showCookiePopup, setShowCookiePopup] = useState(false);
 
+  const upsertMetaTag = (name, content) => {
+    let metaTag = document.querySelector(`meta[name="${name}"]`);
+    if (!metaTag) {
+      metaTag = document.createElement("meta");
+      metaTag.setAttribute("name", name);
+      document.head.appendChild(metaTag);
+    }
+    metaTag.setAttribute("content", content);
+  };
+
+  const formatSlugToTitle = (slug = "") =>
+    slug
+      .split("-")
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(" ");
+
   useEffect(() => {
     const currentPath = window.location.pathname;
     const isUserFacingRoute =
@@ -382,6 +399,47 @@ function App() {
     return () => {
       document.removeEventListener("contextmenu", handleContextMenu);
     };
+  }, []);
+
+  useEffect(() => {
+    const { pathname } = window.location;
+    let metaTitle = "Ares Studio | Games, VFX & 3D Production Excellence";
+    let metaDescription =
+      "Ares Studio delivers world-class game art, VFX, and 3D production services with scalable pipelines and expert talent for global creative projects.";
+
+    if (pathname === "/portfolio") {
+      metaTitle = "Portfolio | Ares Studio Projects in Games & VFX";
+      metaDescription =
+        "Explore Ares Studio portfolio work across games, VFX, and 3D production, featuring high-quality visuals, environments, and cinematic content.";
+    } else if (pathname.startsWith("/projects/")) {
+      const segments = pathname.split("/").filter(Boolean);
+      const projectSlug = segments[1] || "";
+      const albumSlug = segments[3] || "";
+
+      if (albumSlug) {
+        const projectName = formatSlugToTitle(projectSlug);
+        const albumName = formatSlugToTitle(albumSlug);
+        metaTitle = `${albumName} | ${projectName} | Ares Studio`;
+        metaDescription = `View album ${albumName} from ${projectName}, featuring selected Ares Studio production work, visual quality benchmarks, and final creative outputs.`;
+      } else {
+        const projectName = formatSlugToTitle(projectSlug);
+        metaTitle = `${projectName} | Project Case Study | Ares Studio`;
+        metaDescription = `Discover ${projectName}, an Ares Studio project showcasing game art, VFX, and production craftsmanship from concept through final delivery.`;
+      }
+    } else if (pathname === "/blogs") {
+      metaTitle = "Blog | Ares Studio Insights on Games, VFX & Production";
+      metaDescription =
+        "Read Ares Studio insights, updates, and behind-the-scenes stories on game art, VFX pipelines, creative production, and industry trends.";
+    } else if (pathname.startsWith("/blogs/")) {
+      const blogSlug = pathname.split("/").filter(Boolean)[1] || "";
+      const blogTitle = formatSlugToTitle(blogSlug);
+      metaTitle = `${blogTitle} | Ares Studio Blog`;
+      metaDescription = `Read ${blogTitle} on the Ares Studio blog, covering production updates, creative direction, and practical insights for games and VFX teams.`;
+    }
+
+    document.title = metaTitle;
+    upsertMetaTag("title", metaTitle);
+    upsertMetaTag("description", metaDescription);
   }, []);
 
   return (

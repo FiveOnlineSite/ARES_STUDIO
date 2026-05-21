@@ -439,7 +439,9 @@ export default function Career() {
           const career = response.data.careers[0];
 
           // Set document title
-          document.title = career.metaTitle || "Default Title";
+          document.title =
+            career.metaTitle ||
+            "Careers at Ares Studio | Join Our Games & VFX Team";
 
           // Update or create meta description
           let metaDescription = document.querySelector(
@@ -448,13 +450,15 @@ export default function Career() {
           if (metaDescription) {
             metaDescription.setAttribute(
               "content",
-              career.metaDescription || "Default description"
+              career.metaDescription ||
+                "Explore career opportunities at Ares Studio and work with top creative and technical talent in games, VFX, and next-generation digital production."
             );
           } else {
             metaDescription = document.createElement("meta");
             metaDescription.name = "description";
             metaDescription.content =
-              career.metaDescription || "Default description";
+              career.metaDescription ||
+              "Explore career opportunities at Ares Studio and work with top creative and technical talent in games, VFX, and next-generation digital production.";
             document.head.appendChild(metaDescription);
           }
 
@@ -463,12 +467,15 @@ export default function Career() {
           if (metaTitle) {
             metaTitle.setAttribute(
               "content",
-              career.metaTitle || "Default Title"
+              career.metaTitle ||
+                "Careers at Ares Studio | Join Our Games & VFX Team"
             );
           } else {
             metaTitle = document.createElement("meta");
             metaTitle.name = "title";
-            metaTitle.content = career.metaTitle || "Default Title";
+            metaTitle.content =
+              career.metaTitle ||
+              "Careers at Ares Studio | Join Our Games & VFX Team";
             document.head.appendChild(metaTitle);
           }
         }

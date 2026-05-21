@@ -49,25 +49,33 @@ const Services = () => {
   }, []);
 
   useEffect(() => {
-    document.title = "Services | ARES STUDIO";
+    document.title = "Services | Game Art, VFX, Animation & 3D by Ares Studio";
 
     let metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute("content", "Services description");
+      metaDescription.setAttribute(
+        "content",
+        "Explore Ares Studio services across game development support, VFX, animation, and 3D content creation designed for studios, brands, and publishers."
+      );
     } else {
       metaDescription = document.createElement("meta");
       metaDescription.name = "description";
-      metaDescription.content = "Service description";
+      metaDescription.content =
+        "Explore Ares Studio services across game development support, VFX, animation, and 3D content creation designed for studios, brands, and publishers.";
       document.head.appendChild(metaDescription);
     }
 
     let metaTitle = document.querySelector('meta[name="title"]');
     if (metaTitle) {
-      metaTitle.setAttribute("content", "Services Title");
+      metaTitle.setAttribute(
+        "content",
+        "Services | Game Art, VFX, Animation & 3D by Ares Studio"
+      );
     } else {
       metaTitle = document.createElement("meta");
       metaTitle.name = "title";
-      metaTitle.content = "Services Title";
+      metaTitle.content =
+        "Services | Game Art, VFX, Animation & 3D by Ares Studio";
       document.head.appendChild(metaTitle);
     }
   }, []);

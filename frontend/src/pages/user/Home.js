@@ -111,25 +111,33 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    document.title = "Home | ARES STUDIO";
+    document.title = "Ares Studio | Games, VFX & 3D Production Excellence";
 
     let metaDescription = document.querySelector('meta[name="description"]');
     if (metaDescription) {
-      metaDescription.setAttribute("content", "Home description");
+      metaDescription.setAttribute(
+        "content",
+        "Ares Studio delivers world-class game art, VFX, and 3D production services with scalable pipelines and expert talent for global creative projects."
+      );
     } else {
       metaDescription = document.createElement("meta");
       metaDescription.name = "description";
-      metaDescription.content = "Home description";
+      metaDescription.content =
+        "Ares Studio delivers world-class game art, VFX, and 3D production services with scalable pipelines and expert talent for global creative projects.";
       document.head.appendChild(metaDescription);
     }
 
     let metaTitle = document.querySelector('meta[name="title"]');
     if (metaTitle) {
-      metaTitle.setAttribute("content", "Home Title");
+      metaTitle.setAttribute(
+        "content",
+        "Ares Studio | Games, VFX & 3D Production Excellence"
+      );
     } else {
       metaTitle = document.createElement("meta");
       metaTitle.name = "title";
-      metaTitle.content = "Home Title";
+      metaTitle.content =
+        "Ares Studio | Games, VFX & 3D Production Excellence";
       document.head.appendChild(metaTitle);
     }
   }, []);
